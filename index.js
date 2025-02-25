@@ -2,6 +2,10 @@ const CROSS = 'X';
 const ZERO = 'O';
 const EMPTY = ' ';
 
+let gameBoard = []
+let cheiHod = 0;
+let gameOver = false;
+let countHodov = 0;
 const container = document.getElementById('fieldWrapper');
 
 startGame();
@@ -9,6 +13,15 @@ addResetListener();
 
 function startGame () {
     renderGrid(3);
+    for (let i = 0; i < 3; i++) {
+        gameBoard[i] = [];
+        for (let j = 0; j < 3; j++) {
+            gameBoard[i][j] = EMPTY
+        }
+    }
+    cheiHod = 0;
+    countHodov =0;
+    gameOver = false;
 }
 
 function renderGrid (dimension) {
@@ -26,11 +39,73 @@ function renderGrid (dimension) {
     }
 }
 
+function checkWinner() {
+    // Check rows
+    for (let i = 0; i < 3; i++) {
+        if (gameBoard[i][0] !== EMPTY &&
+            gameBoard[i][0] === gameBoard[i][1] &&
+            gameBoard[i][1] === gameBoard[i][2]) {
+            return [[i, 0], [i, 1], [i, 2]];
+        }
+    }
+
+    // Check columns
+    for (let j = 0; j < 3; j++) {
+        if (gameBoard[0][j] !== EMPTY &&
+            gameBoard[0][j] === gameBoard[1][j] &&
+            gameBoard[1][j] === gameBoard[2][j]) {
+            return [[0, j], [1, j], [2, j]];
+        }
+    }
+
+    // Check diagonals
+    if (gameBoard[0][0] !== EMPTY &&
+        gameBoard[0][0] === gameBoard[1][1] &&
+        gameBoard[1][1] === gameBoard[2][2]) {
+        return [[0, 0], [1, 1], [2, 2]];
+    }
+
+    if (gameBoard[0][2] !== EMPTY &&
+        gameBoard[0][2] === gameBoard[1][1] &&
+        gameBoard[1][1] === gameBoard[2][0]) {
+        return [[0, 2], [1, 1], [2, 0]];
+    }
+
+    return null;
+}
+
+
 function cellClickHandler (row, col) {
     // Пиши код тут
     console.log(`Clicked on cell: ${row}, ${col}`);
+    if (gameOver || gameBoard[row][col] !== EMPTY) {
+        return;
+    }
+    if (gameBoard[row][col] === EMPTY)  {
+        if (cheiHod === 0){
+            renderSymbolInCell(CROSS, row, col);
+            gameBoard[row][col] = CROSS;
+        }   else    {
+            renderSymbolInCell(ZERO, row, col);
+            gameBoard[row][col] = ZERO;
+        }
+        cheiHod +=1;
+        cheiHod %=2;
+        countHodov ++; 
+    }
 
-
+    let winnerCeils = checkWinner();
+    if (winnerCeils !== null){
+        gameOver = true;
+        for (let ceil of winnerCeils){
+            renderSymbolInCell(gameBoard[ceil[0]][ceil[1]], ceil[0], ceil[1], 'red' );
+        }
+        let winner = cheiHod === 0 ? ZERO : CROSS;
+        alert(`${winner} победил!`)
+    }
+    else if (countHodov === 9)   {
+        alert('Ничья!');
+    }
     /* Пользоваться методом для размещения символа в клетке так:
         renderSymbolInCell(ZERO, row, col);
      */
@@ -55,6 +130,7 @@ function addResetListener () {
 
 function resetClickHandler () {
     console.log('reset!');
+    startGame();
 }
 
 
